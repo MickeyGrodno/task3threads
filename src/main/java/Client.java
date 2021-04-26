@@ -1,6 +1,8 @@
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
+
 public class Client extends Thread{
     private static final Logger LOGGER = LoggerFactory.getLogger(Client.class);
     private boolean urgentCall = false;
@@ -20,12 +22,20 @@ public class Client extends Thread{
         this.setName("Клиент №"+getClientId());
         LOGGER.info("Поток запущен");
         System.out.println(this.getName()+" дозвонился в справочную службу.");
-        Operator operator;
         LOGGER.info("Попытка вызова оператора потоком");
-        operator = CALL_CENTER.getOperator(getWaitingTime());
+        Operator operator = CALL_CENTER.getOperator(getWaitingTime());
 
         if (operator == null && isUrgentCall()) {
             while (operator == null) {
+                int callBackTime = (int) (Math.random()*4+1);
+                System.out.println(this.getName()+" решил перезвонить через "+callBackTime+" сек.");
+
+                try {
+                    TimeUnit.SECONDS.sleep(callBackTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
                 System.out.println(this.getName()+" повторно позвонил в справочную службу.");
                 operator = CALL_CENTER.getOperator(getWaitingTime());
             }

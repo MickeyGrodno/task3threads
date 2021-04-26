@@ -25,9 +25,7 @@ public class CallCenter {
         Operator operatorForClient = null;
         try {
             semaphore.tryAcquire(waitingTime, TimeUnit.SECONDS);
-            Operator operator = operators.poll();
-            operatorForClient = operator;
-
+            operatorForClient = operators.poll();
         } catch (InterruptedException e) {
         }
         LOGGER.info("Вызван оператор "+operatorForClient);
@@ -38,13 +36,13 @@ public class CallCenter {
     public boolean releaseOperator(Operator operator) {
         boolean callIsOver = false;
         if (lock.tryLock()) {
-            operators.add(operator);
-            callIsOver = true;
-            System.out.println("Оператор №" + operator.getOperatorId() + " освободился.");
-            semaphore.release();
-            lock.unlock();
+            if(callIsOver = operators.add(operator)) {
+                System.out.println("Оператор №" + operator.getOperatorId() + " освободился.");
+                semaphore.release();
+                lock.unlock();
+                LOGGER.info("Оператор №"+operator.getOperatorId()+" возвращен в очередь.");
+            }
         }
-        LOGGER.info("Оператор №"+operator.getOperatorId()+" возвращен в очередь.");
         return callIsOver;
     }
 
